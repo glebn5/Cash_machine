@@ -16,19 +16,19 @@ PDFKIT_CONFIGURATION = pdfkit.configuration(wkhtmltopdf='/usr/bin/wkhtmltopdf')
 
 class CashMachineView(APIView):
     def post(self, request, *args, **kwargs):
-        items = request.data.get('items', [])
-        item = Item.objects.filter(id__in=items)
+        items_id = request.data.get('items', [])
+        items = Item.objects.filter(id__in=items_id)
 
         # проверка существования элементов
-        if not item.exists():
-            return Response({'error': 'Items not found'}, status=status.HTTP_400_BAD_REQUEST)
+        if not items.exists():
+            return Response({'error': 'Товары не найдены'}, status=status.HTTP_400_BAD_REQUEST)
         
-        total = sum(i.price for i in item)
+        total = sum(i.price for i in items)
 
         date = datetime.datetime.now()
         
         context = {
-            'items': item,
+            'items': items,
             'total': total,
             'date': date.strftime("%d.%m.%y %H:%M"),
         }
