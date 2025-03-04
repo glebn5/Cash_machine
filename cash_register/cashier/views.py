@@ -11,25 +11,24 @@ import os
 import qrcode
 from django.http import HttpResponse
 import socket
-import logging
 
 PDFKIT_CONFIGURATION = pdfkit.configuration(wkhtmltopdf='/usr/bin/wkhtmltopdf')
 
 class CashMachineView(APIView):
     def post(self, request, *args, **kwargs):
-        items_id = request.data.get('items', [])
-        items = Item.objects.filter(id__in=items_id)
+        items = request.data.get('items', [])
+        item = Item.objects.filter(id__in=items)
 
         # проверка существования элементов
-        if not items.exists():
+        if not item.exists():
             return Response({'error': 'Items not found'}, status=status.HTTP_400_BAD_REQUEST)
         
-        total = sum(i.price for i in items)
+        total = sum(i.price for i in item)
 
         date = datetime.datetime.now()
         
         context = {
-            'items': items,
+            'items': item,
             'total': total,
             'date': date.strftime("%d.%m.%y %H:%M"),
         }
@@ -46,10 +45,8 @@ class CashMachineView(APIView):
         html_file = render_to_string('check.html', context)
         pdf_name = f'{date.strftime("%d-%m-%y_%H-%M")}.pdf'
         pdf_path = os.path.join(settings.MEDIA_ROOT, pdf_name)
-        try:
-            pdfkit.from_string(html_file, pdf_path, configuration=PDFKIT_CONFIGURATION, options=options)
-        except Exception as e:
-            return Response({'error': f'Ошибка создания pdf файла: {str(e)}'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        pdfkit.from_string(html_file, pdf_path, configuration=PDFKIT_CONFIGURATION, options=options)
+
         
 
         # получим IP машины
@@ -64,13 +61,10 @@ class CashMachineView(APIView):
             box_size=10,         
             border=4               
         )
-        try:
-            qr.add_data(f'http://{ip_address}:8000/media/{pdf_name}')
-            qr.make(fit=True)
-            qr_code_img = qr.make_image()
-            qr_code_img.save(os.path.join(settings.MEDIA_ROOT, f"qr_{pdf_name}.png"))
-        except Exception as e:
-            return Response({'error': f'Ошибка создания qr-кода: {str(e)}'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        qr.add_data(f'http://{ip_address}:8000/media/{pdf_name}')
+        qr.make(fit=True)
+        qr_code_img = qr.make_image()
+        qr_code_img.save(os.path.join(settings.MEDIA_ROOT, f"qr_{pdf_name}.png"))
 
         with open(os.path.join(settings.MEDIA_ROOT, f"qr_{pdf_name}.png"), 'rb') as qr_file:
             return HttpResponse(qr_file.read(), content_type="image/png")
