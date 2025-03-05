@@ -73,8 +73,9 @@
             <p class="ml-8px">АДМИ</p>
             {% for item in items %}
                 <div class="item">
-                    <p>{{item.item}}</p>
-                    <p class="ml-17px">1 <span class="ml-68px">={{item.price}}</span></p>
+                    <p>{{item.item}}</p>    
+                    
+                    <p class="ml-17px">{{ item.count }} <span class="ml-68px">={{item.total_price}}</span></p>
                 </div>
             {% endfor %}
         </div>
