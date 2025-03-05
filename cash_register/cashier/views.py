@@ -64,7 +64,7 @@ class CashMachineView(APIView):
         qr.add_data(f'http://{ip_address}:8000/media/{pdf_name}')
         qr.make(fit=True)
         qr_code_img = qr.make_image()
-        qr_code_img.save(os.path.join(settings.MEDIA_ROOT, f"qr_{pdf_name}.png"))
+        qr_code_img.save(os.path.join(settings.MEDIA_ROOT, f"qr_{pdf_name[:-3]}.png"))
 
         with open(os.path.join(settings.MEDIA_ROOT, f"qr_{pdf_name}.png"), 'rb') as qr_file:
             return HttpResponse(qr_file.read(), content_type="image/png")

@@ -2,8 +2,8 @@
 *.log
 *.pot
 *.pyc
-./cash_register/cashier/__pycache__
-./cash_register/db.sqlite3
+cash_register/cashier/__pycache__
+cash_register/db.sqlite3
 
 
 # Backup files
