@@ -3,6 +3,7 @@
 *.pot
 *.pyc
 cash_register/cashier/__pycache__
+cash_register/cash_register/__pycache__
 cash_register/db.sqlite3
 
 
